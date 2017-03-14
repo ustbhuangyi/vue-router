@@ -461,7 +461,7 @@ function install (Vue) {
 
 var inBrowser = typeof window !== 'undefined';
 
-var isIOS901 = inBrowser && /iPhone OS 9_[01]]/i.test(window.userAgent);
+var isIOS901 = inBrowser && /iPhone OS 9_[01]]/i.test(window.navigator.userAgent);
 
 var isWechatWK = inBrowser && window.__wxjs_is_wkwebview;
 
