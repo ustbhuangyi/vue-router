@@ -4,6 +4,7 @@ import type Router from '../index'
 import { History } from './base'
 import { cleanPath } from '../util/path'
 import { getLocation } from './html5'
+import { isIOS901, isWechatWK } from '../util/dom'
 
 export class HashHistory extends History {
   constructor (router: Router, base: ?string, fallback: boolean) {
@@ -49,6 +50,9 @@ export class HashHistory extends History {
   ensureURL (push?: boolean) {
     const current = this.current.fullPath
     if (getHash() !== current) {
+      if (isIOS901 && !isWechatWK) {
+        return
+      }
       push ? pushHash(current) : replaceHash(current)
     }
   }
