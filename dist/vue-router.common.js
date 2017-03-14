@@ -1,5 +1,5 @@
 /**
-  * vue-router v2.2.1
+  * vue-router v2.3.0
   * (c) 2017 Evan You
   * @license MIT
   */
@@ -462,6 +462,10 @@ function install (Vue) {
 /*  */
 
 var inBrowser = typeof window !== 'undefined';
+
+var isIOS901 = inBrowser && /iPhone OS 9_[01]]/i.test(window.userAgent);
+
+var isWechatWK = inBrowser && window.__wxjs_is_wkwebview;
 
 /*  */
 
@@ -1449,7 +1453,8 @@ function getScrollPosition () {
 }
 
 function getElementPosition (el) {
-  var docRect = document.documentElement.getBoundingClientRect();
+  var docEl = document.documentElement;
+  var docRect = docEl.getBoundingClientRect();
   var elRect = el.getBoundingClientRect();
   return {
     x: elRect.left - docRect.left,
@@ -1680,7 +1685,7 @@ function normalizeBase (base) {
     if (inBrowser) {
       // respect <base> tag
       var baseEl = document.querySelector('base');
-      base = baseEl ? baseEl.getAttribute('href') : '/';
+      base = (baseEl && baseEl.getAttribute('href')) || '/';
     } else {
       base = '/';
     }
@@ -1895,9 +1900,11 @@ var HTML5History = (function (History$$1) {
   HTML5History.prototype.push = function push (location, onComplete, onAbort) {
     var this$1 = this;
 
+    var ref = this;
+    var fromRoute = ref.current;
     this.transitionTo(location, function (route) {
       pushState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, this$1.current, false);
+      handleScroll(this$1.router, route, fromRoute, false);
       onComplete && onComplete(route);
     }, onAbort);
   };
@@ -1905,9 +1912,11 @@ var HTML5History = (function (History$$1) {
   HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
     var this$1 = this;
 
+    var ref = this;
+    var fromRoute = ref.current;
     this.transitionTo(location, function (route) {
       replaceState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, this$1.current, false);
+      handleScroll(this$1.router, route, fromRoute, false);
       onComplete && onComplete(route);
     }, onAbort);
   };
@@ -1987,6 +1996,9 @@ var HashHistory = (function (History$$1) {
   HashHistory.prototype.ensureURL = function ensureURL (push) {
     var current = this.current.fullPath;
     if (getHash() !== current) {
+      if (isIOS901 && !isWechatWK) {
+        return
+      }
       push ? pushHash(current) : replaceHash(current);
     }
   };
@@ -2269,7 +2281,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '2.2.1';
+VueRouter.version = '2.3.0';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
