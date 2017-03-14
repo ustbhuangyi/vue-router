@@ -1,5 +1,5 @@
 /**
-  * vue-router v2.3.0
+  * vue-router v2.3.1
   * (c) 2017 Evan You
   * @license MIT
   */
@@ -463,7 +463,7 @@ function install (Vue) {
 
 var inBrowser = typeof window !== 'undefined';
 
-var isIOS901 = inBrowser && /iPhone OS 9_[01]]/i.test(window.navigator.userAgent);
+var isIOS901 = inBrowser && /iPhone OS 9_[01]/i.test(window.navigator.userAgent);
 
 var isWechatWK = inBrowser && window.__wxjs_is_wkwebview;
 
@@ -2281,7 +2281,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '2.3.0';
+VueRouter.version = '2.3.1';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
