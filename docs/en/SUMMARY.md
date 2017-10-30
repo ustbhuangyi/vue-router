@@ -1,7 +1,7 @@
 # vue-router 2
-<!--email_off-->
-> Note: vue-router@2.x only works with Vue 2.x. Docs for 0.7.x is [here](https://github.com/vuejs/vue-router/tree/1.0/docs/en).
-<!--/email_off-->
+
+> Note: for TypeScript users, vue-router@3.0+ requires vue@2.5+, and vice versa.
+
 **[Release Notes](https://github.com/vuejs/vue-router/releases)**
 
 - [Installation](installation.md)
@@ -23,9 +23,19 @@
   - [Scroll Behavior](advanced/scroll-behavior.md)
   - [Lazy Loading](advanced/lazy-loading.md)
 - API Reference
+  - [Router Constructor Options](api/options.md)
+    - [routes](api/options.md#routes)
+    - [mode](api/options.md#mode)
+    - [base](api/options.md#base)
+    - [linkActiveClass](api/options.md#linkactiveclass)
+    - [linkExactActiveClass](api/options.md#linkexactactiveclass)
+    - [scrollBehavior](api/options.md#scrollbehavior)
+    - [parseQuery / stringifyQuery](api/options.md#parsequery--stringifyquery)
+    - [fallback](api/options.md#fallback)
+  - [The Router Instance](api/router-instance.md)
+    - [Properties](api/router-instance.md#properties)
+    - [Methods](api/router-instance.md#methods)
+  - [The Route Object](api/route-object.md)
+  - [Component Injections](api/component-injections.md)
   - [router-link](api/router-link.md)
   - [router-view](api/router-view.md)
-  - [The Route Object](api/route-object.md)
-  - [Router Constructor Options](api/options.md)
-  - [Router Instance](api/router-instance.md)
-  - [Component Injections](api/component-injections.md)

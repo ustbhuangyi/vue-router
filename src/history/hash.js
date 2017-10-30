@@ -5,6 +5,8 @@ import { History } from './base'
 import { cleanPath } from '../util/path'
 import { getLocation } from './html5'
 import { isIOS901, isWechatWK } from '../util/dom'
+import { setupScroll, handleScroll } from '../util/scroll'
+import { pushState, replaceState, supportsPushState } from '../util/push-state'
 
 export class HashHistory extends History {
   constructor (router: Router, base: ?string, fallback: boolean) {
@@ -19,26 +21,44 @@ export class HashHistory extends History {
   // this is delayed until the app mounts
   // to avoid the hashchange listener being fired too early
   setupListeners () {
-    window.addEventListener('hashchange', () => {
+    const router = this.router
+    const expectScroll = router.options.scrollBehavior
+    const supportsScroll = supportsPushState && expectScroll
+
+    if (supportsScroll) {
+      setupScroll()
+    }
+
+    window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
+      const current = this.current
       if (!ensureSlash()) {
         return
       }
       this.transitionTo(getHash(), route => {
-        replaceHash(route.fullPath)
+        if (supportsScroll) {
+          handleScroll(this.router, route, current, true)
+        }
+        if (!supportsPushState) {
+          replaceHash(route.fullPath)
+        }
       })
     })
   }
 
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const { current: fromRoute } = this
     this.transitionTo(location, route => {
       pushHash(route.fullPath)
+      handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const { current: fromRoute } = this
     this.transitionTo(location, route => {
       replaceHash(route.fullPath)
+      handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
@@ -89,13 +109,25 @@ export function getHash (): string {
   return index === -1 ? '' : href.slice(index + 1)
 }
 
+function getUrl (path) {
+  const href = window.location.href
+  const i = href.indexOf('#')
+  const base = i >= 0 ? href.slice(0, i) : href
+  return `${base}#${path}`
+}
+
 function pushHash (path) {
-  window.location.hash = path
+  if (supportsPushState) {
+    pushState(getUrl(path))
+  } else {
+    window.location.hash = path
+  }
 }
 
 function replaceHash (path) {
-  const i = window.location.href.indexOf('#')
-  window.location.replace(
-    window.location.href.slice(0, i >= 0 ? i : 0) + '#' + path
-  )
+  if (supportsPushState) {
+    replaceState(getUrl(path))
+  } else {
+    window.location.replace(getUrl(path))
+  }
 }

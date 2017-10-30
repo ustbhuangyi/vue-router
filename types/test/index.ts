@@ -1,7 +1,6 @@
-import Vue = require("vue");
-import { ComponentOptions } from "vue";
+import Vue, { ComponentOptions, AsyncComponent } from "vue";
 
-import VueRouter = require("../index");
+import VueRouter from "../index";
 import { Route, RouteRecord, RedirectOption } from "../index";
 
 Vue.use(VueRouter);
@@ -9,6 +8,7 @@ Vue.use(VueRouter);
 const Home = { template: "<div>home</div>" };
 const Foo = { template: "<div>foo</div>" };
 const Bar = { template: "<div>bar</div>" };
+const Async = () => Promise.resolve({ template: "<div>async</div>" })
 
 const Hook: ComponentOptions<Vue> = {
   template: "<div>hook</div>",
@@ -40,10 +40,16 @@ const Hook: ComponentOptions<Vue> = {
 const router = new VueRouter({
   mode: "history",
   base: "/",
+  fallback: false,
   linkActiveClass: "active",
+  linkExactActiveClass: "exact-active",
   scrollBehavior: (to, from, savedPosition) => {
     if (from.path === "/") {
       return { selector: "#app" };
+    }
+
+    if (from.path === "/offset") {
+      return { selector: '#foo', offset: { x: 0, y: 100 }}
     }
 
     if (to.path === "/child") {
@@ -53,6 +59,11 @@ const router = new VueRouter({
     if (savedPosition) {
       return savedPosition;
     }
+
+    return Promise.resolve({
+      x: 0,
+      y: 0
+    })
   },
   routes: [
     { path: "/", name: "home", component: Home, children: [
@@ -60,7 +71,8 @@ const router = new VueRouter({
         path: "child",
         components: {
           default: Foo,
-          bar: Bar
+          bar: Bar,
+          asyncComponent: Async,
         },
         meta: { auth: true },
         beforeEnter (to, from, next) {
@@ -103,7 +115,7 @@ const matched: RouteRecord[] = route.matched;
 matched.forEach(m => {
   const path: string = m.path;
   const components: {
-    [key: string]: ComponentOptions<Vue> | typeof Vue
+    [key: string]: ComponentOptions<Vue> | typeof Vue | AsyncComponent
   } = m.components;
   const instances: { [key: string]: Vue } = m.instances;
   const name: string | undefined = m.name;
@@ -111,10 +123,18 @@ matched.forEach(m => {
   const redirect: RedirectOption | undefined = m.redirect;
 });
 
-router.beforeEach((to, from, next) => {
+const unregister = router.beforeEach((to, from, next) => {
   to.params;
   next("/");
   next();
+});
+
+unregister();
+
+router.beforeResolve((to, from, next) => {
+  to.params;
+  from.params;
+  next()
 });
 
 router.afterEach((to, from) => {
@@ -147,7 +167,7 @@ router.go(-1);
 router.back();
 router.forward();
 
-const Components: ComponentOptions<Vue> | typeof Vue = router.getMatchedComponents();
+const Components: (ComponentOptions<Vue> | typeof Vue | AsyncComponent)[] = router.getMatchedComponents();
 
 const vm = new Vue({
   router,

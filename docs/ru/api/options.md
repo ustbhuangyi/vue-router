@@ -18,6 +18,10 @@
     children?: Array<RouteConfig>; // для вложенных путей
     beforeEnter?: (to: Route, from: Route, next: Function) => void;
     meta?: any;
+
+    // 2.6.0+
+    caseSensitive?: boolean; // учитывать ли регистр при сравнении? (по умолчанию: false)
+    pathToRegexpOptions?: Object; // настройки path-to-regexp для компиляции regex
   }
   ```
 
@@ -53,6 +57,16 @@
 
   Глобальная конфигурация CSS-класса по умолчанию для активных ссылок `<router-link>`. См. также [router-link](router-link.md).
 
+### linkExactActiveClass
+
+> Добавлено в версии 2.5.0+
+
+- Тип: `string`
+
+- По умолчанию: `"router-link-exact-active"`
+
+  Глобально настраивает для `<router-link>` активный класс по умолчанию для точных совпадений маршрута. См. также [router-link](router-link.md).
+
 ### scrollBehavior
 
 - тип: `Function`
@@ -60,11 +74,34 @@
   Сигнатура:
 
   ```
-  (
+  type PositionDescriptor =
+    { x: number, y: number } |
+    { selector: string } |
+    ?{}
+
+  type scrollBehaviorHandler = (
     to: Route,
     from: Route,
     savedPosition?: { x: number, y: number }
-  ) => { x: number, y: number } | { selector: string } | ?{}
+  ) => PositionDescriptor | Promise<PositionDescriptor>
   ```
 
   Для подробностей см. [Скроллинг](../advanced/scroll-behavior.md).
+
+### parseQuery / stringifyQuery
+
+> Добавлено в версии 2.4.0+
+
+- Тип: `Function`
+
+  Пользовательские функции для парсинга строки запроса / приведения к строке запроса (функции stringify). Переопределяют значения по умолчанию.
+
+### fallback
+
+> 2.6.0+
+
+- Тип: `boolean`
+
+  Контролирует, должен ли маршрутизатор возвращаться в режим `hash`, когда браузер не поддерживает `history.pushState`. По умолчанию значение `true`.
+
+  Установка этого параметра в `false` будет вызывать для каждой навигации через `router-link` полное обновление страницы в IE9. Это может быть полезным, когда приложение рендерится на стороне сервера и должно работать в IE9, потому что режим `hash` не работает с SSR.

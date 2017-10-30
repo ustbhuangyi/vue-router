@@ -1,6 +1,6 @@
 # Named Views
 
-Sometimes you need to display multiples views at the same time instead of nesting them, e.g. creating a layout with a `sidebar` view and a `main` view. This is where named views came in handy. Instead of having one single outlet in your view, you can have multiple and give each of them a name. A `router-view` without a name will be given `default` as its name.
+Sometimes you need to display multiple views at the same time instead of nesting them, e.g. creating a layout with a `sidebar` view and a `main` view. This is where named views came in handy. Instead of having one single outlet in your view, you can have multiple and give each of them a name. A `router-view` without a name will be given `default` as its name.
 
 ``` html
 <router-view class="view one"></router-view>
@@ -26,5 +26,4 @@ const router = new VueRouter({
 })
 ```
 
-A working demo of this example can be found
-[here](https://jsfiddle.net/posva/6du90epg/).
+A working demo of this example can be found [here](https://jsfiddle.net/posva/6du90epg/).

@@ -6,7 +6,7 @@ const encodeReserveRE = /[!'()*]/g
 const encodeReserveReplacer = c => '%' + c.charCodeAt(0).toString(16)
 const commaRE = /%2C/g
 
-// fixed encodeURIComponent which is more comformant to RFC3986:
+// fixed encodeURIComponent which is more conformant to RFC3986:
 // - escapes [!'()*]
 // - preserve commas
 const encode = str => encodeURIComponent(str)
@@ -17,23 +17,21 @@ const decode = decodeURIComponent
 
 export function resolveQuery (
   query: ?string,
-  extraQuery: Dictionary<string> = {}
+  extraQuery: Dictionary<string> = {},
+  _parseQuery: ?Function
 ): Dictionary<string> {
-  if (query) {
-    let parsedQuery
-    try {
-      parsedQuery = parseQuery(query)
-    } catch (e) {
-      process.env.NODE_ENV !== 'production' && warn(false, e.message)
-      parsedQuery = {}
-    }
-    for (const key in extraQuery) {
-      parsedQuery[key] = extraQuery[key]
-    }
-    return parsedQuery
-  } else {
-    return extraQuery
+  const parse = _parseQuery || parseQuery
+  let parsedQuery
+  try {
+    parsedQuery = parse(query || '')
+  } catch (e) {
+    process.env.NODE_ENV !== 'production' && warn(false, e.message)
+    parsedQuery = {}
   }
+  for (const key in extraQuery) {
+    parsedQuery[key] = extraQuery[key]
+  }
+  return parsedQuery
 }
 
 function parseQuery (query: string): Dictionary<string> {
@@ -78,7 +76,7 @@ export function stringifyQuery (obj: Dictionary<string>): string {
 
     if (Array.isArray(val)) {
       const result = []
-      val.slice().forEach(val2 => {
+      val.forEach(val2 => {
         if (val2 === undefined) {
           return
         }

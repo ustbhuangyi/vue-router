@@ -26,10 +26,10 @@
   <!-- 이렇게 렌더링 됩니다. -->
   <a href="home">Home</a>
 
-  <!-- v-bind를 이용한 표현식 -->
+  <!-- `v-bind`를 이용한 표현식 -->
   <router-link v-bind:to="'home'">Home</router-link>
 
-  <!-- v-bind를 생략하면 다른 prop를 바인딩 하는 것과 같습니다. -->
+  <!-- `v-bind`를 생략하면 다른 prop를 바인딩 하는 것과 같습니다. -->
   <router-link :to="'home'">Home</router-link>
 
   <!-- 위와 같습니다. -->
@@ -38,7 +38,7 @@
   <!-- 이름을 가지는 라우트 -->
   <router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
 
-  <!-- 쿼리가 있으면, /register?plan=private 이 됩니다. -->
+  <!-- 쿼리가 있으면, `/register?plan=private` 이 됩니다. -->
   <router-link :to="{ path: 'register', query: { plan: 'private' }}">Register</router-link>
   ```
 
@@ -99,7 +99,7 @@
   이것의 결과는 `<router-link to="/">`가 모든 라우터에 대해 활성화 될 것입니다! 링크를 "완전 일치 모드"로 강제하려면 `exact` prop를 사용하십시오.
 
   ``` html
-  <!-- 이 링크는 / 에서만 active 됩니다 -->
+  <!-- 이 링크는 `/` 에서만 active 됩니다 -->
   <router-link to="/" exact>
   ```
 
@@ -114,6 +114,15 @@
   - 기본값: `'click'`
 
   링크 네비게이션을 트리거 할 수있는 이벤트를 지정합니다.
+
+- **exact-active-class**
+
+  > 2.5.0+
+  - 자료형: `string`
+  - 기본값: `"router-link-exact-active"`
+
+ 정확하게 일치하는 링크가 활성된 상태일 때 적용되는 CSS 클래스를 지정합니다. 기본값은`linkExactActiveClass` 라우터 생성자 옵션을 통해 전역으로 설정 될 수 있습니다.
+
 
 ### 외부 엘리먼트에 active 클래스 적용하기
 

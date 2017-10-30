@@ -8,7 +8,7 @@ Since the `<router-view>` is essentially a dynamic component, we can apply trans
 </transition>
 ```
 
-[Everything about `<transition>`](http://vuejs.org/guide/transitions.html) works the same here.
+[Everything about `<transition>`](https://vuejs.org/guide/transitions.html) works the same here.
 
 ### Per-Route Transition
 
@@ -45,7 +45,7 @@ It is also possible to determine the transition to use dynamically based on the 
 
 ``` js
 // then, in the parent component,
-// watch the $route to determine the transition to use
+// watch the `$route` to determine the transition to use
 watch: {
   '$route' (to, from) {
     const toDepth = to.path.split('/').length

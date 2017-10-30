@@ -2,7 +2,7 @@
 
 As the name suggests, the navigation guards provided by `vue-router` are primarily used to guard navigations either by redirecting it or canceling it. There are a number of ways to hook into the route navigation process: globally, per-route, or in-component.
 
-Remember **Params or queries changes won't trigger navigation guards**. Simply [watch the `$route` object](../essentials/dynamic-matching.md#reacting-to-params-changes) to react to those changes.
+Remember that **params or query changes won't trigger enter/leave navigation guards**. You can either [watch the `$route` object](../essentials/dynamic-matching.md#reacting-to-params-changes) to react to those changes, or use the `beforeRouteUpdate` in-component guard.
 
 ### Global Guards
 
@@ -30,9 +30,19 @@ Every guard function receives three arguments:
 
   - **`next(false)`**: abort the current navigation. If the browser URL was changed (either manually by the user or via back button), it will be reset to that of the `from` route.
 
-  - **`next('/')` or `next({ path: '/' })`**: redirect to a different location. The current navigation will be aborted and a new one will be started.
+  - **`next('/')` or `next({ path: '/' })`**: redirect to a different location. The current navigation will be aborted and a new one will be started. You can pass any location object to `next`, which allows you to specify options like `replace: true`, `name: 'home'` and any option used in [`router-link`'s `to` prop](../api/router-link.md) or [`router.push`](../api/router-instance.md#methods)
+
+  - **`next(error)`**: (2.4.0+) if the argument passed to `next` is an instance of `Error`, the navigation will be aborted and the error will be passed to callbacks registered via `router.onError()`.
 
 **Make sure to always call the `next` function, otherwise the hook will never be resolved.**
+
+### Global Resolve Guards
+
+> New in 2.5.0
+
+In 2.5.0+ you can register a global guard with `router.beforeResolve`. This is similar to `router.beforeEach`, with the difference that resolve guards will be called right before the navigation is confirmed, **after all in-component guards and async route components are resolved**.
+
+### Global After Hooks
 
 You can also register global after hooks, however unlike guards, these hooks do not get a `next` function and cannot affect the navigation:
 
@@ -67,7 +77,7 @@ These guards have the exact same signature as global before guards.
 Finally, you can directly define route navigation guards inside route components (the ones passed to the router configuration) with the following options:
 
 - `beforeRouteEnter`
-- `beforeRouteUpdate` (added in 2.2)
+- `beforeRouteUpdate` (added in 2.2+)
 - `beforeRouteLeave`
 
 ``` js
@@ -81,8 +91,8 @@ const Foo = {
   beforeRouteUpdate (to, from, next) {
     // called when the route that renders this component has changed,
     // but this component is reused in the new route.
-    // For example, for a route with dynamic params /foo/:id, when we
-    // navigate between /foo/1 and /foo/2, the same Foo component instance
+    // For example, for a route with dynamic params `/foo/:id`, when we
+    // navigate between `/foo/1` and `/foo/2`, the same `Foo` component instance
     // will be reused, and this hook will be called when that happens.
     // has access to `this` component instance.
   },
@@ -106,4 +116,40 @@ beforeRouteEnter (to, from, next) {
 }
 ```
 
-You can directly access `this` inside `beforeRouteLeave`. The leave guard is usually used to prevent the user from accidentally leaving the route with unsaved edits. The navigation can be canceled by calling `next(false)`.
+Note that `beforeRouteEnter` is the only guard that supports passing a callback to `next`. For `beforeRouteUpdate` and `beforeRouteLeave`, `this` is already available, so passing a callback is unnecessary and therefore *not supported*:
+
+```js
+beforeRouteUpdate (to, from, next) {
+  // just use `this`
+  this.name = to.params.name
+  next()
+}
+```
+
+The **leave guard** is usually used to prevent the user from accidentally leaving the route with unsaved edits. The navigation can be canceled by calling `next(false)`.
+
+```js
+beforeRouteLeave (to, from , next) {
+  const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
+  if (answer) {
+    next()
+  } else {
+    next(false)
+  }
+}
+```
+
+### The Full Navigation Resolution Flow
+
+1. Navigation triggered.
+2. Call leave guards in deactivated components.
+3. Call global `beforeEach` guards.
+4. Call `beforeRouteUpdate` guards in reused components (2.2+).
+5. Call `beforeEnter` in route configs.
+6. Resolve async route components.
+7. Call `beforeRouteEnter` in activated components.
+8. Call global `beforeResolve` guards (2.5+).
+9. Navigation confirmed.
+10. Call global `afterEach` hooks.
+11. DOM updates triggered.
+12. Call callbacks passed to `next` in `beforeRouteEnter` guards with instantiated instances.

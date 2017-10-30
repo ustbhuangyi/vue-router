@@ -18,6 +18,10 @@
     children?: Array<RouteConfig>; // for nested routes
     beforeEnter?: (to: Route, from: Route, next: Function) => void;
     meta?: any;
+
+    // 2.6.0+
+    caseSensitive?: boolean; // use case sensitive match? (default: false)
+    pathToRegexpOptions?: Object; // path-to-regexp options for compiling regex
   }
   ```
 
@@ -53,6 +57,16 @@
 
   Globally configure `<router-link>` default active class. Also see [router-link](router-link.md).
 
+### linkExactActiveClass
+
+> 2.5.0+
+
+- type: `string`
+
+- default: `"router-link-exact-active"`
+
+  Globally configure `<router-link>` default active class for exact matches. Also see [router-link](router-link.md).
+
 ### scrollBehavior
 
 - type: `Function`
@@ -60,11 +74,34 @@
   Signature:
 
   ```
-  (
+  type PositionDescriptor =
+    { x: number, y: number } |
+    { selector: string } |
+    ?{}
+
+  type scrollBehaviorHandler = (
     to: Route,
     from: Route,
     savedPosition?: { x: number, y: number }
-  ) => { x: number, y: number } | { selector: string } | ?{}
+  ) => PositionDescriptor | Promise<PositionDescriptor>
   ```
 
   For more details see [Scroll Behavior](../advanced/scroll-behavior.md).
+
+### parseQuery / stringifyQuery
+
+> 2.4.0+
+
+- type: `Function`
+
+  Provide custom query string parse / stringify functions. Overrides the default.
+
+### fallback
+
+> 2.6.0+
+
+- type: `boolean`
+
+  Controls whether the router should fallback to `hash` mode when the browser does not support `history.pushState`. Defaults to `true`.
+
+  Setting this to `false` essentially makes every `router-link` navigation a full page refresh in IE9. This is useful when the app is server-rendered and needs to work in IE9, because a hash mode URL does not work with SSR.

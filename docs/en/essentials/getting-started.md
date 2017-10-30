@@ -2,9 +2,9 @@
 
 > We will be using [ES2015](https://github.com/lukehoban/es6features) in the code samples in the guide.
 
-Creating a Single-page Application with Vue.js + vue-router is dead simple. With Vue.js, we are already composing our application with components. When adding vue-router to the mix, all we need to do is map our components to the routes and let vue-router know where to render them. Here's a basic example:
+Creating a Single-page Application with Vue + Vue Router is dead simple. With Vue.js, we are already composing our application with components. When adding vue-router to the mix, all we need to do is map our components to the routes and let vue-router know where to render them. Here's a basic example:
 
-> All examples will be using the standalone version of Vue to make template parsing possible. See more details [here](http://vuejs.org/guide/installation.html#Standalone-vs-Runtime-only-Build).
+> All examples will be using the full version of Vue to make template parsing possible. See more details [here](https://vuejs.org/v2/guide/installation.html#Runtime-Compiler-vs-Runtime-only).
 
 ### HTML
 
@@ -17,7 +17,7 @@ Creating a Single-page Application with Vue.js + vue-router is dead simple. With
   <p>
     <!-- use router-link component for navigation. -->
     <!-- specify the link by passing the `to` prop. -->
-    <!-- <router-link> will be rendered as an `<a>` tag by default -->
+    <!-- `<router-link>` will be rendered as an `<a>` tag by default -->
     <router-link to="/foo">Go to Foo</router-link>
     <router-link to="/bar">Go to Bar</router-link>
   </p>
@@ -30,7 +30,8 @@ Creating a Single-page Application with Vue.js + vue-router is dead simple. With
 ### JavaScript
 
 ``` js
-// 0. If using a module system (e.g. via vue-cli), import Vue and VueRouter and then call Vue.use(VueRouter).
+// 0. If using a module system (e.g. via vue-cli), import Vue and VueRouter
+// and then call `Vue.use(VueRouter)`.
 
 // 1. Define route components.
 // These can be imported from other files
@@ -40,7 +41,7 @@ const Bar = { template: '<div>bar</div>' }
 // 2. Define some routes
 // Each route should map to a component. The "component" can
 // either be an actual component constructor created via
-// Vue.extend(), or just a component options object.
+// `Vue.extend()`, or just a component options object.
 // We'll talk about nested routes later.
 const routes = [
   { path: '/foo', component: Foo },
@@ -51,7 +52,7 @@ const routes = [
 // You can pass in additional options here, but let's
 // keep it simple for now.
 const router = new VueRouter({
-  routes // short for routes: routes
+  routes // short for `routes: routes`
 })
 
 // 4. Create and mount the root instance.
@@ -64,6 +65,29 @@ const app = new Vue({
 // Now the app has started!
 ```
 
-You can also checkout this example [live](http://jsfiddle.net/yyx990803/xgrjzsup/).
+By injecting the router, we get access to it as `this.$router` as well as the current route as `this.$route` inside of any component:
+
+```js
+// Home.vue
+export default {
+  computed: {
+    username () {
+      // We will see what `params` is shortly
+      return this.$route.params.username
+    }
+  },
+  methods: {
+    goBack () {
+      window.history.length > 1
+        ? this.$router.go(-1)
+        : this.$router.push('/')
+    }
+  }
+}
+```
+
+Throughout the docs, we will often use the `router` instance. Keep in mind that `this.$router` is exactly the same as using `router`. The reason we use `this.$router` is because we don't want to import the router in every single component that needs to manipulate routing.
+
+You can also check out this example [live](https://jsfiddle.net/yyx990803/xgrjzsup/).
 
 Notice that a `<router-link>` automatically gets the `.router-link-active` class when its target route is matched. You can learn more about it in its [API reference](../api/router-link.md).

@@ -4,6 +4,8 @@ Aside from using `<router-link>` to create anchor tags for declarative navigatio
 
 #### `router.push(location, onComplete?, onAbort?)`
 
+**Note: Inside of a Vue instance, you have access to the router instance as `$router`. You can therefore call `this.$router.push`.**
+
 To navigate to a different URL, use `router.push`. This method pushes a new entry into the history stack, so when the user clicks the browser back button they will be taken to the previous URL.
 
 This is the method called internally when you click a `<router-link>`, so clicking `<router-link :to="...">` is the equivalent of calling `router.push(...)`.
@@ -15,7 +17,7 @@ This is the method called internally when you click a `<router-link>`, so clicki
 The argument can be a string path, or a location descriptor object. Examples:
 
 ``` js
-// literal string
+// literal string path
 router.push('home')
 
 // object
@@ -28,7 +30,21 @@ router.push({ name: 'user', params: { userId: 123 }})
 router.push({ path: 'register', query: { plan: 'private' }})
 ```
 
+**Note**: `params` are ignored if a `path` is provided, which is not the case for `query`, as shown in the example above. Instead, you need to provide the `name` of the route or manually specify the whole `path` with any parameter:
+
+```js
+const userId = 123
+router.push({ name: 'user', params: { userId }}) // -> /user/123
+router.push({ path: `/user/${userId}` }) // -> /user/123
+// This will NOT work
+router.push({ path: '/user', params: { userId }}) // -> /user
+```
+
+The same rules apply for the `to` property of the `router-link` component.
+
 In 2.2.0+, optionally provide `onComplete` and `onAbort` callbacks to `router.push` or `router.replace` as the 2nd and 3rd arguments. These callbacks will be called when the navigation either successfully completed (after all async hooks are resolved), or aborted (navigated to the same route, or to a different route before current navigation has finished), respectively.
+
+**Note:** If the destination is the same as the current route and only params are changing (e.g. going from one profile to another `/users/1` -> `/users/2`), you will have to use [`beforeRouteUpdate`](./dynamic-matching.html#reacting-to-params-changes) to react to changes (e.g. fetching the user information).
 
 #### `router.replace(location, onComplete?, onAbort?)`
 
@@ -37,7 +53,6 @@ It acts like `router.push`, the only difference is that it navigates without pus
 | Declarative | Programmatic |
 |-------------|--------------|
 | `<router-link :to="..." replace>` | `router.replace(...)` |
-
 
 #### `router.go(n)`
 

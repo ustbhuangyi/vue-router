@@ -1,8 +1,18 @@
 declare var document: Document;
 
+declare class RouteRegExp extends RegExp {
+  keys: Array<{ name: string, optional: boolean }>;
+}
+
+declare type PathToRegexpOptions = {
+  sensitive?: boolean,
+  strict?: boolean,
+  end?: boolean
+}
+
 declare module 'path-to-regexp' {
   declare var exports: {
-    (path: string, keys: Array<?{ name: string }>): RegExp;
+    (path: string, keys?: Array<?{ name: string }>, options?: PathToRegexpOptions): RouteRegExp;
     compile: (path: string) => (params: Object) => string;
   }
 }
@@ -15,16 +25,24 @@ declare type NavigationGuard = (
   next: (to?: RawLocation | false | Function | void) => void
 ) => any
 
+declare type AfterNavigationHook = (to: Route, from: Route) => any
+
+type Position = { x: number, y: number };
+type PositionResult = Position | { selector: string, offset?: Position } | void;
+
 declare type RouterOptions = {
   routes?: Array<RouteConfig>;
   mode?: string;
+  fallback?: boolean;
   base?: string;
   linkActiveClass?: string;
+  parseQuery?: (query: string) => Object;
+  stringifyQuery?: (query: Object) => string;
   scrollBehavior?: (
     to: Route,
     from: Route,
-    savedPosition: ?{ x: number, y: number }
-  ) => { x: number, y: number } | { selector: string } | ?{};
+    savedPosition: ?Position
+  ) => PositionResult | Promise<PositionResult>;
 }
 
 declare type RedirectOption = RawLocation | ((to: Route) => RawLocation)
@@ -40,10 +58,13 @@ declare type RouteConfig = {
   beforeEnter?: NavigationGuard;
   meta?: any;
   props?: boolean | Object | Function;
+  caseSensitive?: boolean;
+  pathToRegexpOptions?: PathToRegexpOptions;
 }
 
 declare type RouteRecord = {
   path: string;
+  regex: RouteRegExp;
   components: Dictionary<any>;
   instances: Dictionary<any>;
   name: ?string;

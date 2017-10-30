@@ -48,8 +48,7 @@ const User = {
 }
 ```
 
-To render components into this nested outlet, we need to use the `children`
-option in `VueRouter` constructor config:
+To render components into this nested outlet, we need to use the `children` option in `VueRouter` constructor config:
 
 ``` js
 const router = new VueRouter({
@@ -97,4 +96,4 @@ const router = new VueRouter({
 })
 ```
 
-A working demo of this example can be found [here](http://jsfiddle.net/yyx990803/L7hscd8h/).
+A working demo of this example can be found [here](https://jsfiddle.net/yyx990803/L7hscd8h/).

@@ -1,7 +1,7 @@
 # Vue-router 2
-<!--email_off-->
-> Примечание: Vue-router@2.x работает только с Vue 2.x. Документация для версии 0.7.x находится [здесь (en)](https://github.com/vuejs/vue-router/tree/1.0/docs/en).
-<!--/email_off-->
+
+> Примечание: для пользователей TypeScript, vue-router@3.0+ требуется vue@2.5+, и наоборот.
+
 **[История изменений](https://github.com/vuejs/vue-router/releases)**
 
 - [Введение](README.md)
@@ -24,9 +24,19 @@
   - [Скроллинг](advanced/scroll-behavior.md)
   - [Ленивая загрузка путей](advanced/lazy-loading.md)
 - Справочник API
+  - [Опции конструктора Router'а](api/options.md)
+    - [routes](api/options.md#routes)
+    - [mode](api/options.md#mode)
+    - [base](api/options.md#base)
+    - [linkActiveClass](api/options.md#linkactiveclass)
+    - [linkExactActiveClass](api/options.md#linkexactactiveclass)
+    - [scrollBehavior](api/options.md#scrollbehavior)
+    - [parseQuery / stringifyQuery](api/options.md#parsequery--stringifyquery)
+    - [fallback](api/options.md#fallback)
+  - [Экземпляр Router](api/router-instance.md)
+    - [Свойства](api/router-instance.md#свойства)
+    - [Методы](api/router-instance.md#методы)
+  - [Объект route](api/route-object.md)
+  - [Интеграция с компонентами Vue](api/component-injections.md)
   - [router-link](api/router-link.md)
   - [router-view](api/router-view.md)
-  - [Объект route](api/route-object.md)
-  - [Опции конструктора Router'а](api/options.md)
-  - [Инстанс Router'а](api/router-instance.md)
-  - [Интеграция с компонентами Vue](api/component-injections.md)

@@ -26,10 +26,10 @@
   <!-- renders to -->
   <a href="home">Home</a>
 
-  <!-- javascript expression using v-bind -->
+  <!-- javascript expression using `v-bind` -->
   <router-link v-bind:to="'home'">Home</router-link>
 
-  <!-- Omitting v-bind is fine, just as binding any other prop -->
+  <!-- Omitting `v-bind` is fine, just as binding any other prop -->
   <router-link :to="'home'">Home</router-link>
 
   <!-- same as above -->
@@ -38,7 +38,7 @@
   <!-- named route -->
   <router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
 
-  <!-- with query, resulting in /register?plan=private -->
+  <!-- with query, resulting in `/register?plan=private` -->
   <router-link :to="{ path: 'register', query: { plan: 'private' }}">Register</router-link>
   ```
 
@@ -99,11 +99,11 @@
   One consequence of this is that `<router-link to="/">` will be active for every route! To force the link into "exact match mode", use the `exact` prop:
 
   ``` html
-  <!-- this link will only be active at / -->
+  <!-- this link will only be active at `/` -->
   <router-link to="/" exact>
   ```
 
-  Checkout more examples explaining active link class [live](https://jsfiddle.net/8xrk1n9f/).
+  Check out more examples explaining active link class [live](https://jsfiddle.net/8xrk1n9f/).
 
 - **event**
 
@@ -114,6 +114,16 @@
   - default: `'click'`
 
   Specify the event(s) that can trigger the link navigation.
+
+- **exact-active-class**
+
+  > 2.5.0+
+
+  - type: `string`
+
+  - default: `"router-link-exact-active"`
+
+  Configure the active CSS class applied when the link is active with exact match. Note the default value can also be configured globally via the `linkExactActiveClass` router constructor option.
 
 ### Applying Active Class to Outer Element
 

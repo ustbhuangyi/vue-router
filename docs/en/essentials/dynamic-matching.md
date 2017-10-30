@@ -25,7 +25,7 @@ const User = {
 }
 ```
 
-You can checkout a live example [here](http://jsfiddle.net/yyx990803/4xfa2f19/).
+You can check out a live example [here](https://jsfiddle.net/yyx990803/4xfa2f19/).
 
 You can have multiple dynamic segments in the same route, and they will map to corresponding fields on `$route.params`. Examples:
 
@@ -49,6 +49,18 @@ const User = {
     '$route' (to, from) {
       // react to route changes...
     }
+  }
+}
+```
+
+Or, use the `beforeRouteUpdate` guard introduced in 2.2:
+
+``` js
+const User = {
+  template: '...',
+  beforeRouteUpdate (to, from, next) {
+    // react to route changes...
+    // don't forget to call next()
   }
 }
 ```

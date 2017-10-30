@@ -1,7 +1,7 @@
 # vue-router 2
-<!--email_off-->
-> 注意: vue-router@2.x は Vue 2.x のみで動作します。[0.7 のドキュメントをお探しですか?](https://github.com/vuejs/vue-router/tree/1.0/docs/ja)
-<!--/email_off-->
+
+> 注意: TypeScript ユーザ向けは、vue-router@>= 3.0 と vue@>=2.5 が必須、逆もまた同様です。
+
 **[リリースノート](https://github.com/vuejs/vue-router/releases)**
 
 - [インストール](installation.md)
@@ -23,9 +23,19 @@
   - [スクロールの振る舞い](advanced/scroll-behavior.md)
   - [遅延ローディング](advanced/lazy-loading.md)
 - API リファレンス
+  - [ルーターコンストラクタオプション](api/options.md)
+    - [routes](api/options.md#routes)
+    - [mode](api/options.md#mode)
+    - [base](api/options.md#base)
+    - [linkActiveClass](api/options.md#linkactiveclass)
+    - [linkExactActiveClass](api/options.md#linkexactactiveclass)
+    - [scrollBehavior](api/options.md#scrollbehavior)
+    - [parseQuery / stringifyQuery](api/options.md#parsequery--stringifyquery)
+    - [fallback](api/options.md#fallback)
+  - [ルーターインスタンス](api/router-instance.md)
+    - [Properties](api/router-instance.md#properties)
+    - [Methods](api/router-instance.md#methods)
+  - [ルートオブジェクト](api/route-object.md)
+  - [コンポーネント注入](api/component-injections.md)
   - [router-link](api/router-link.md)
   - [router-view](api/router-view.md)
-  - [ルートオブジェクト](api/route-object.md)
-  - [ルーターコンストラクタオプション](api/options.md)
-  - [ルーターインスタンス](api/router-instance.md)
-  - [コンポーネント注入](api/component-injections.md)

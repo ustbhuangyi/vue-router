@@ -8,7 +8,7 @@
 </transition>
 ```
 
-[`<transition>` についての全て](http://vuejs.org/guide/transitions.html) はここでも動作します。
+[`<transition>` についての全て](http://jp.vuejs.org/guide/transitions.html) はここでも動作します。
 
 ### ルート単位のトランジション
 
@@ -45,7 +45,7 @@ const Bar = {
 
 ``` js
 // そして親コンポーネントの中で、
-// $route を watch して使用するトランジションを決定します
+// `$route` を watch して使用するトランジションを決定します
 watch: {
   '$route' (to, from) {
     const toDepth = to.path.split('/').length

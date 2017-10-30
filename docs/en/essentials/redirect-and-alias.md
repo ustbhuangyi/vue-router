@@ -35,6 +35,8 @@ const router = new VueRouter({
 })
 ```
 
+Note that [Navigation Guards](../advanced/navigation-guards.md) are not applied on the route that redirects, only on its target. In the example below, adding a `beforeEnter` or `beforeLeave` guard to the `/a` route would not have any effect.
+
 For other advanced usage, checkout the [example](https://github.com/vuejs/vue-router/blob/dev/examples/redirect/app.js).
 
 ### Alias
@@ -55,4 +57,4 @@ const router = new VueRouter({
 
 An alias gives you the freedom to map a UI structure to an arbitrary URL, instead of being constrained by the configuration's nesting structure.
 
-For advanced usage, checkout the [example](https://github.com/vuejs/vue-router/blob/dev/examples/route-alias/app.js).
+For advanced usage, check out the [example](https://github.com/vuejs/vue-router/blob/dev/examples/route-alias/app.js).

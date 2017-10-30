@@ -30,6 +30,42 @@ describe('Route utils', () => {
       }
       expect(isSameRoute(a, b)).toBe(true)
     })
+
+    it('nested query', () => {
+      const a = {
+        path: '/abc',
+        query: { foo: { bar: 'bar' }, arr: [1, 2] }
+      }
+      const b = {
+        path: '/abc',
+        query: { arr: [1, 2], foo: { bar: 'bar' } }
+      }
+      const c = {
+        path: '/abc',
+        query: { arr: [1, 2], foo: { bar: 'not bar' } }
+      }
+      expect(isSameRoute(a, b)).toBe(true)
+      expect(isSameRoute(a, c)).toBe(false)
+    })
+
+    it('queries with null values', () => {
+      const a = {
+        path: '/abc',
+        query: { foo: null }
+      }
+      const b = {
+        path: '/abc',
+        query: { foo: null }
+      }
+      const c = {
+        path: '/abc',
+        query: { foo: 5 }
+      }
+      expect(() => isSameRoute(a, b)).not.toThrow()
+      expect(() => isSameRoute(a, c)).not.toThrow()
+      expect(isSameRoute(a, b)).toBe(true)
+      expect(isSameRoute(a, c)).toBe(false)
+    })
   })
 
   describe('isIncludedRoute', () => {

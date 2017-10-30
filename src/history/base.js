@@ -1,11 +1,16 @@
 /* @flow */
 
+import { _Vue } from '../install'
 import type Router from '../index'
-import { warn } from '../util/warn'
 import { inBrowser } from '../util/dom'
 import { runQueue } from '../util/async'
+import { warn, isError } from '../util/warn'
 import { START, isSameRoute } from '../util/route'
-import { _Vue } from '../install'
+import {
+  flatten,
+  flatMapComponents,
+  resolveAsyncComponents
+} from '../util/resolve-components'
 
 export class History {
   router: Router;
@@ -15,6 +20,8 @@ export class History {
   cb: (r: Route) => void;
   ready: boolean;
   readyCbs: Array<Function>;
+  readyErrorCbs: Array<Function>;
+  errorCbs: Array<Function>;
 
   // implemented by sub-classes
   +go: (n: number) => void;
@@ -31,18 +38,27 @@ export class History {
     this.pending = null
     this.ready = false
     this.readyCbs = []
+    this.readyErrorCbs = []
+    this.errorCbs = []
   }
 
   listen (cb: Function) {
     this.cb = cb
   }
 
-  onReady (cb: Function) {
+  onReady (cb: Function, errorCb: ?Function) {
     if (this.ready) {
       cb()
     } else {
       this.readyCbs.push(cb)
+      if (errorCb) {
+        this.readyErrorCbs.push(errorCb)
+      }
     }
+  }
+
+  onError (errorCb: Function) {
+    this.errorCbs.push(errorCb)
   }
 
   transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
@@ -55,16 +71,32 @@ export class History {
       // fire ready cbs once
       if (!this.ready) {
         this.ready = true
-        this.readyCbs.forEach(cb => {
-          cb(route)
-        })
+        this.readyCbs.forEach(cb => { cb(route) })
       }
-    }, onAbort)
+    }, err => {
+      if (onAbort) {
+        onAbort(err)
+      }
+      if (err && !this.ready) {
+        this.ready = true
+        this.readyErrorCbs.forEach(cb => { cb(err) })
+      }
+    })
   }
 
   confirmTransition (route: Route, onComplete: Function, onAbort?: Function) {
     const current = this.current
-    const abort = () => { onAbort && onAbort() }
+    const abort = err => {
+      if (isError(err)) {
+        if (this.errorCbs.length) {
+          this.errorCbs.forEach(cb => { cb(err) })
+        } else {
+          warn(false, 'uncaught error during route navigation:')
+          console.error(err)
+        }
+      }
+      onAbort && onAbort(err)
+    }
     if (
       isSameRoute(route, current) &&
       // in the case the route map has been dynamically appended to
@@ -98,29 +130,44 @@ export class History {
       if (this.pending !== route) {
         return abort()
       }
-      hook(route, current, (to: any) => {
-        if (to === false) {
-          // next(false) -> abort navigation, ensure current URL
-          this.ensureURL(true)
-          abort()
-        } else if (typeof to === 'string' || typeof to === 'object') {
-          // next('/') or next({ path: '/' }) -> redirect
-          (typeof to === 'object' && to.replace) ? this.replace(to) : this.push(to)
-          abort()
-        } else {
-          // confirm transition and pass on the value
-          next(to)
-        }
-      })
+      try {
+        hook(route, current, (to: any) => {
+          if (to === false || isError(to)) {
+            // next(false) -> abort navigation, ensure current URL
+            this.ensureURL(true)
+            abort(to)
+          } else if (
+            typeof to === 'string' ||
+            (typeof to === 'object' && (
+              typeof to.path === 'string' ||
+              typeof to.name === 'string'
+            ))
+          ) {
+            // next('/') or next({ path: '/' }) -> redirect
+            abort()
+            if (typeof to === 'object' && to.replace) {
+              this.replace(to)
+            } else {
+              this.push(to)
+            }
+          } else {
+            // confirm transition and pass on the value
+            next(to)
+          }
+        })
+      } catch (e) {
+        abort(e)
+      }
     }
 
     runQueue(queue, iterator, () => {
       const postEnterCbs = []
       const isValid = () => this.current === route
-      const enterGuards = extractEnterGuards(activated, postEnterCbs, isValid)
       // wait until async components are resolved before
       // extracting in-component enter guards
-      runQueue(enterGuards, iterator, () => {
+      const enterGuards = extractEnterGuards(activated, postEnterCbs, isValid)
+      const queue = enterGuards.concat(this.router.resolveHooks)
+      runQueue(queue, iterator, () => {
         if (this.pending !== route) {
           return abort()
         }
@@ -128,7 +175,7 @@ export class History {
         onComplete(route)
         if (this.router.app) {
           this.router.app.$nextTick(() => {
-            postEnterCbs.forEach(cb => cb())
+            postEnterCbs.forEach(cb => { cb() })
           })
         }
       })
@@ -151,6 +198,8 @@ function normalizeBase (base: ?string): string {
       // respect <base> tag
       const baseEl = document.querySelector('base')
       base = (baseEl && baseEl.getAttribute('href')) || '/'
+      // strip full URL origin
+      base = base.replace(/^https?:\/\/[^\/]+/, '')
     } else {
       base = '/'
     }
@@ -221,9 +270,11 @@ function extractUpdateHooks (updated: Array<RouteRecord>): Array<?Function> {
   return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
 }
 
-function bindGuard (guard: NavigationGuard, instance: _Vue): NavigationGuard {
-  return function boundRouteGuard () {
-    return guard.apply(instance, arguments)
+function bindGuard (guard: NavigationGuard, instance: ?_Vue): ?NavigationGuard {
+  if (instance) {
+    return function boundRouteGuard () {
+      return guard.apply(instance, arguments)
+    }
   }
 }
 
@@ -273,63 +324,5 @@ function poll (
     setTimeout(() => {
       poll(cb, instances, key, isValid)
     }, 16)
-  }
-}
-
-function resolveAsyncComponents (matched: Array<RouteRecord>): Array<?Function> {
-  return flatMapComponents(matched, (def, _, match, key) => {
-    // if it's a function and doesn't have Vue options attached,
-    // assume it's an async component resolve function.
-    // we are not using Vue's default async resolving mechanism because
-    // we want to halt the navigation until the incoming component has been
-    // resolved.
-    if (typeof def === 'function' && !def.options) {
-      return (to, from, next) => {
-        const resolve = once(resolvedDef => {
-          match.components[key] = resolvedDef
-          next()
-        })
-
-        const reject = once(reason => {
-          warn(false, `Failed to resolve async component ${key}: ${reason}`)
-          next(false)
-        })
-
-        const res = def(resolve, reject)
-        if (res && typeof res.then === 'function') {
-          res.then(resolve, reject)
-        }
-      }
-    }
-  })
-}
-
-function flatMapComponents (
-  matched: Array<RouteRecord>,
-  fn: Function
-): Array<?Function> {
-  return flatten(matched.map(m => {
-    return Object.keys(m.components).map(key => fn(
-      m.components[key],
-      m.instances[key],
-      m, key
-    ))
-  }))
-}
-
-function flatten (arr) {
-  return Array.prototype.concat.apply([], arr)
-}
-
-// in Webpack 2, require.ensure now also returns a Promise
-// so the resolve/reject functions may get called an extra time
-// if the user uses an arrow function shorthand that happens to
-// return that Promise.
-function once (fn) {
-  let called = false
-  return function () {
-    if (called) return
-    called = true
-    return fn.apply(this, arguments)
   }
 }
